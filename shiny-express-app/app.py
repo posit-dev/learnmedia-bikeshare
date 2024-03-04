@@ -35,7 +35,7 @@ with ui.layout_columns():
         "Bikes available"
         @render.text
         def bikes_available():
-            latest_day_data = shared.bikes[shared.bikes['time'].dt.date == shared.bikes['time'].dt.date.max()]
+            latest_day_data = bike_data()[bike_data()['time'].dt.date == bike_data()['time'].dt.date.max()]
 
             n_bikes = (
               latest_day_data.groupby("time")["num_bikes_available"]
