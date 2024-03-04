@@ -1,0 +1,27 @@
+/*-- scss:defaults --*/
+
+$green-bright: #9FD8CB !default;
+$green-medium: #517664 !default;
+$green-dark:   #2D3319 !default;
+$green-light:  #D6E5E3 !default;
+$orange:       #E4572E !default;
+$red:          #CC2936 !default;
+
+$primary:       $green-light !default;
+$secondary:     $green-bright !default;
+$success:       $green-medium !default;
+$info:          $green-dark !default;
+$warning:       $orange !default;
+$danger:        $red !default;
+
+$navbar-bg: $green-light;
+
+// fonts
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+3:300,300i,400,400i);
+$font-family-sans-serif: "Source Sans 3", sans-serif !default;
+
+/*-- scss:rules --*/
+.card-header {
+  background-color: $green-light;
+}
+

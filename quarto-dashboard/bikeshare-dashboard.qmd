@@ -1,0 +1,97 @@
+---
+title: "Bikeshare availability in Washington, DC"
+format: dashboard
+---
+
+```{python}
+from IPython.display import Markdown
+import pandas as pd
+import pyarrow.feather as feather
+
+from helpers import show_city, show_trend
+```
+
+```{python}
+bikes = feather.read_feather("../data/bikes_info.arrow")
+stations = feather.read_feather("../data/stations_info.arrow")
+```
+
+```{python}
+# Focus on a single city
+bikes = bikes[bikes['city'] == 'dc']
+stations = stations[stations['city'] == 'dc']
+
+bikes["time"] = bikes.time.dt.tz_convert("EST")
+```
+
+## Row
+
+```{python}
+#| content: valuebox
+#| title: "Total bikes"
+
+# Approximates the total number of bikes in the system
+latest_day_data = bikes[bikes['time'].dt.date == bikes['time'].dt.date.max()]
+
+total_num_bikes_available = (
+  latest_day_data.groupby("time")["num_bikes_available"]
+  .sum()
+  .max()
+)
+
+dict(
+  icon = "bicycle",
+  color = "blue",
+  value = total_num_bikes_available
+)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Average bikes available per station"
+
+dict(
+  icon = "square",
+  color = "blue",
+  value = bikes['num_bikes_available'].median().astype(int)
+)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Number of stations"
+
+dict(
+  icon = "buildings",
+  color = "blue",
+  value = stations['station_id'].nunique()
+)
+```
+
+
+## Row
+
+### Column
+
+```{python}
+#| title: Station map
+
+show_city(stations = stations)
+```
+
+
+### Column
+
+```{python}
+#| title: Number of station bikes available
+
+show_trend(bikes = bikes)
+```
+
+## Row {height=30%}
+
+```{python}
+#| title: Station information
+
+Markdown(stations.to_markdown(index = False))
+```

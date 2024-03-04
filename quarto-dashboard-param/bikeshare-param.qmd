@@ -1,0 +1,124 @@
+---
+title: "Bikeshare availability"
+format:
+  dashboard:
+    logo: images/logo.png
+    theme:
+      - custom.scss
+---
+
+```{python}
+#| tags: [parameters]
+
+# to render w/ a different product type:
+# quarto render quarto-dashboard-param/bikeshare-param.qmd -P city:chicago
+
+city = "dc"
+```
+
+```{python}
+from IPython.display import Markdown
+import pandas as pd
+import pyarrow.feather as feather
+
+from helpers import show_city, show_trend, city_tz_convert
+```
+
+```{python}
+bikes = feather.read_feather("../data/bikes_info.arrow")
+stations = feather.read_feather("../data/stations_info.arrow")
+```
+
+```{python}
+# Subset data to only include specified city
+bikes = bikes[bikes['city'] == city]
+stations = stations[stations['city'] == city]
+
+# convert timezone for city
+bikes['time'] = city_tz_convert(bikes['time'], bikes['city'])
+```
+
+## Row
+
+```{python}
+cities = {
+    "austin": "Austin, TX",
+    "chicago": "Chicago, IL",
+    "dc": "Washington, DC"
+}
+
+city_name = cities.get(city)
+
+Markdown(f"Bike availability for **{city_name}**")
+```
+
+## Row
+
+```{python}
+#| content: valuebox
+#| title: "Total bikes"
+
+# Approximates the total number of bikes in the system
+latest_day_data = bikes[bikes['time'].dt.date == bikes['time'].dt.date.max()]
+
+total_num_bikes_available = (
+  latest_day_data.groupby("time")["num_bikes_available"]
+  .sum()
+  .max()
+)
+
+dict(
+  icon = "bicycle",
+  color = "secondary",
+  value = total_num_bikes_available
+)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Average bikes available per station"
+
+dict(
+  icon = "square",
+  color = "success",
+  value = bikes['num_bikes_available'].median().astype(int)
+)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Number of stations"
+
+dict(
+  icon = "buildings",
+  color = "info",
+  value = stations['station_id'].nunique()
+)
+```
+
+## Row
+
+### Column
+
+```{python}
+#| title: Station map
+
+show_city(stations = stations)
+```
+
+
+### Column
+
+```{python}
+#| title: Number of station bikes available
+
+show_trend(bikes = bikes)
+```
+
+## Row {height=30%}
+
+```{python}
+#| title: Station information
+
+Markdown(stations.to_markdown(index = False))
+```
