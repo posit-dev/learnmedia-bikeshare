@@ -1,22 +1,22 @@
-# app.py
-  
 from shiny import reactive
 from shiny.express import input, ui, render
-from shinywidgets import render_widget  
+from shinywidgets import render_widget
 from faicons import icon_svg as icon
 
 import shared
 from helpers import show_city, show_trend
+from test import show_capacity
 
 ui.page_opts(title="Bikeshare availability in three cities", )
 
 with ui.sidebar():
-    ui.input_radio_buttons(  
-        "city",  
-        "Select a city:",  
-        {"austin": "Austin", "chicago": "Chicago", "dc": "Washington DC"}, 
-        selected = "dc"   
-    )  
+    ui.input_radio_buttons(
+        "city",
+        "Select a city:",
+        {"austin": "Austin", "chicago": "Chicago", "dc": "Washington DC"},
+        selected = "dc"   )
+
+
 
 @reactive.calc
 def bike_data():
@@ -42,9 +42,9 @@ with ui.layout_columns():
               .sum()
               .max()
             )
-            
+
             return f"{n_bikes:,}"
-    
+
     with ui.value_box(
         showcase = icon("square", style="regular"),
         theme = ui.value_box_theme(bg = "#517664", fg = "#FFFFFF")
@@ -65,14 +65,14 @@ with ui.layout_columns():
             n_stations = bike_data()['station_id'].nunique()
             return f"{n_stations:,}"
 
-with ui.layout_columns(col_widths=[5, 7]):
+with ui.layout_columns(col_widths=[8, 4]):
 
     with ui.card():
         ui.card_header("Station Map")
-        @render_widget  
+        @render_widget
         def map():
-            return show_city(stations = station_data())
-            
+            return show_capacity(bikes=bike_data(), stations = station_data())
+
     with ui.card():
         ui.card_header("Availability")
         @render_widget
@@ -83,6 +83,6 @@ with ui.layout_columns():
 
     with ui.card():
         ui.card_header("Station information")
-        @render.data_frame  
+        @render.data_frame
         def table():
             return render.DataTable(bike_data().head(1000))
